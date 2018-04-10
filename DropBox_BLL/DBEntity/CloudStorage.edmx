@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="CloudStorageModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="DropBoxExactOnline">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DropBoxPath" Type="nvarchar" MaxLength="2000" Nullable="false" />
+          <Property Name="DropBoxFileModifiedDate" Type="datetime" Nullable="false" />
+          <Property Name="ExactOnlineGUID" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="isFile" Type="tinyint" Nullable="false" />
+          <Property Name="FileStillAlive" Type="tinyint" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DropboxWebhook">
+          <Key>
+            <PropertyRef Name="DW_Id" />
+          </Key>
+          <Property Name="DW_Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DW_Body" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="DW_TimeStamp" Type="datetime" />
+          <Property Name="DW_Processed" Type="tinyint" Nullable="false" />
+          <Property Name="DW_ProcessTimeStamp" Type="datetime" />
+        </EntityType>
+        <EntityContainer Name="CloudStorageModelStoreContainer">
+          <EntitySet Name="DropBoxExactOnline" EntityType="Self.DropBoxExactOnline" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DropboxWebhook" EntityType="Self.DropboxWebhook" Schema="dbo" store:Type="Tables" />
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="CloudStorageModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="DropBoxExactOnline">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DropBoxPath" Type="String" MaxLength="2000" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ExactOnlineGUID" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="isFile" Type="Byte" Nullable="false" />
+          <Property Name="DropBoxFileModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="FileStillAlive" Type="Byte" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DropboxWebhook">
+          <Key>
+            <PropertyRef Name="DW_Id" />
+          </Key>
+          <Property Name="DW_Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DW_Body" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DW_TimeStamp" Type="DateTime" Precision="3" />
+          <Property Name="DW_Processed" Type="Byte" Nullable="false" />
+          <Property Name="DW_ProcessTimeStamp" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityContainer Name="CloudStorageEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="DropBoxExactOnlines" EntityType="Self.DropBoxExactOnline" />
+          <EntitySet Name="DropboxWebhooks" EntityType="Self.DropboxWebhook" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="CloudStorageModelStoreContainer" CdmEntityContainer="CloudStorageEntities">
+          <EntitySetMapping Name="DropBoxExactOnlines">
+            <EntityTypeMapping TypeName="CloudStorageModel.DropBoxExactOnline">
+              <MappingFragment StoreEntitySet="DropBoxExactOnline">
+                <ScalarProperty Name="FileStillAlive" ColumnName="FileStillAlive" />
+                <ScalarProperty Name="DropBoxFileModifiedDate" ColumnName="DropBoxFileModifiedDate" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="DropBoxPath" ColumnName="DropBoxPath" />
+                <ScalarProperty Name="ExactOnlineGUID" ColumnName="ExactOnlineGUID" />
+                <ScalarProperty Name="isFile" ColumnName="isFile" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DropboxWebhooks">
+            <EntityTypeMapping TypeName="CloudStorageModel.DropboxWebhook">
+              <MappingFragment StoreEntitySet="DropboxWebhook">
+                <ScalarProperty Name="DW_Id" ColumnName="DW_Id" />
+                <ScalarProperty Name="DW_Body" ColumnName="DW_Body" />
+                <ScalarProperty Name="DW_TimeStamp" ColumnName="DW_TimeStamp" />
+                <ScalarProperty Name="DW_Processed" ColumnName="DW_Processed" />
+                <ScalarProperty Name="DW_ProcessTimeStamp" ColumnName="DW_ProcessTimeStamp" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

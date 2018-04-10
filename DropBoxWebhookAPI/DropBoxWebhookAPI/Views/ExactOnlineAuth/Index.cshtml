@@ -1,0 +1,14 @@
+﻿<script type="text/javascript">
+        if(@Session["CodeReturned"].ToString())
+        {
+            window.opener.location.reload();
+            //window.opener.location.href = window.opener.location.href;
+            window.close();
+        }
+</script>
+@{
+    ViewBag.Title = "ExactOnline Authentication";
+}
+
+<h2>ExactOnlineAuth</h2>
+
