@@ -30,7 +30,8 @@ namespace DropBoxWebhookAPI.Controllers
                 Session["lblDropBoxMsg"] = "";
                 Session["btnDropBoxbtnV"] = "hidden";
                 Session["btnExactOnlinebtnV"] = "hidden";
-
+                Session["SyncAllNumbers"] = "";
+                Session["ResultNumbers"] = "";
 
                 strSiteBaseURL = Request.Url.Scheme + "://" + Request.Url.Host;
                 if (Request.Url.Port > 0) { strSiteBaseURL += ":" + Request.Url.Port.ToString(); };
@@ -158,7 +159,7 @@ namespace DropBoxWebhookAPI.Controllers
                                await getDropBoxFilesList((List<string>)Session["FolderPath"]);
 
                                 //*** 2. Call Sync Function which Sync all Modified files with Exact Online Store
-                                SyncAllFilesFolders((List<DropBoxFile>)Session["lstDropBoxFile"]);
+                                await SyncAllFilesFolders((List<DropBoxFile>)Session["lstDropBoxFile"]);
 
                                 if (objRecord != null)
                                 {
@@ -179,7 +180,21 @@ lnIndexEnd:
 
             HttpContext.Application["SyncInProgress"] = false; //*** Release Lock Flag
 
-            return View();
+            //*** Display Results
+            if (Session["SyncAllNumbers"].ToString() != "")
+            {
+                string[] strAllResultNumbers = Session["SyncAllNumbers"].ToString().Split(',');
+
+                Session["ResultNumbers"] = "Dropbox Files= " + strAllResultNumbers[0] + " ,Files Processed= " + strAllResultNumbers[1] + " ,Files Replaced Successfully= " + strAllResultNumbers[2] + " ,Failure= " + strAllResultNumbers[3];
+            }
+          
+            try
+            {                
+                return View();
+            }
+            finally
+            {                
+            }
         }
 
         //*****************************************************************
@@ -238,7 +253,7 @@ lnIndexEnd:
         /// </summary>
         /// <param name="lstDropBoxFile">Dropbox files in List Format</param>
         /// <returns></returns>
-        private async void SyncAllFilesFolders(List<DropBoxFile> lstDropBoxFile)
+        private async Task SyncAllFilesFolders(List<DropBoxFile> lstDropBoxFile)
         {
             //System.Threading.Thread.Sleep(30000);
 
@@ -259,6 +274,7 @@ lnIndexEnd:
                 (from p in objCloudStorageEntities.DropBoxExactOnlines
                  where p.Id >= 0
                  select p).ToList().ForEach(x => x.FileStillAlive = 0);
+                objCloudStorageEntities.SaveChanges();
 
                 //*** Loop on All Objects on DropBox Grid View
                 foreach (var DropBoxFile in lstDropBoxFile)
@@ -273,7 +289,7 @@ lnIndexEnd:
                     //*** 2. Not Exist, So Add File to Exact Online and DB
                     //*** 3. Exist with Different Modified Date, So Update File into Exact Online and Modified Date into DB
                
-                    DropBoxExactOnline objRecord = objCloudStorageEntities.DropBoxExactOnlines.Where(i => i.DropBoxPath == DropBoxFile.FilePath).FirstOrDefault();
+                    DropBoxExactOnline objRecord = objCloudStorageEntities.DropBoxExactOnlines.Where(i => i.DropBoxPath == DropBoxFile.FileName).FirstOrDefault();
                     if (objRecord == null || (objRecord != null && DropBoxFile.ModificationDate != objRecord.DropBoxFileModifiedDate))   //*** Not Exist Or File Exist with Different Modification Date
                     {
                         //********************************************************************
@@ -311,6 +327,15 @@ lnIndexEnd:
                                 objExactOnlineConnector.AccessToken = Session["ExactOnlineAccessToken"].ToString();
                             }
 
+                            //**** Get Document Folder GUID
+                            Session["CurrentExactFolderGUID"] = string.Empty;       //*** Root Folder
+
+                            //*** If File already exisit then Delete it first   
+                            if(objRecord != null && DropBoxFile.ModificationDate != objRecord.DropBoxFileModifiedDate)
+                            {
+                                objExactOnlineConnector.DeleteDocument(objRecord.ExactOnlineGUID);  //**** Call Delete Document
+                            }
+
                             strExactFileGUID = objExactOnlineConnector.CreateDocumentWithAttachment(DropBoxFile.FileName, Session["CurrentExactFolderGUID"].ToString(), Common.ConvertStreamtoByteArr(fnStreamResult));
                             if (strExactFileGUID == "")
                             {
@@ -319,7 +344,7 @@ lnIndexEnd:
                             else
                             {
                                 intSuccess += 1;
-                            }
+                            }                           
                         }
                         //******************************************************************                    
 
@@ -327,7 +352,7 @@ lnIndexEnd:
                         {
                             //*** add to DB
                             DropBoxExactOnline objRecordNew = new DropBoxExactOnline();
-                            objRecordNew.DropBoxPath = DropBoxFile.FilePath;
+                            objRecordNew.DropBoxPath = DropBoxFile.FileName;
                             objRecordNew.DropBoxFileModifiedDate = DropBoxFile.ModificationDate;
                             objRecordNew.ExactOnlineGUID = strExactFileGUID;
                             objRecordNew.isFile = 1;
@@ -345,6 +370,14 @@ lnIndexEnd:
 
                             objCloudStorageEntities.SaveChanges();
                         }
+                    }
+
+                    //*** If File still exit and not changed
+                    if (objRecord != null && DropBoxFile.ModificationDate == objRecord.DropBoxFileModifiedDate)
+                    {
+                        objRecord.FileStillAlive = 1;
+
+                        objCloudStorageEntities.SaveChanges();
                     }
 
                     //*** set Session Variable (Shared Variable)

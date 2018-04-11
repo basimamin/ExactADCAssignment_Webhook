@@ -1,6 +1,5 @@
 ﻿<!-- FileManager Class Begin -->
 <script type="text/javascript">
-
     //*** This function open XDrop Box Authentication window
     function DropBoxAuth() {
         window.open('DropBoxAuth', 'mywindow', 'location=200, scrollbars=1, width=800,height=600');
@@ -13,6 +12,13 @@
         window.open('ExactOnlineAuth', 'mywindow', 'location=200, scrollbars=1, width=600,height=300');
         return false;
     }
+
+    //*** Auto Refresh Page   
+    var timeout = setTimeout("location.reload(true);", 60000);
+    function resetTimeout() {
+        clearTimeout(timeout);
+        timeout = setTimeout("location.reload(true);", 60000);
+    }
 </script>
 <div class="jumbotron">
     <h4>Sync Dropbox Files</h4>
@@ -20,6 +26,9 @@
 <div class="row">
     <div class="col-md-4">
         <p>@Session["lblDropBoxMsg"].ToString()</p>
+    </div>
+    <div class="col-md-4">
+        <p>@Session["ResultNumbers"].ToString()</p>
     </div>
     <div class="col-md-4">
         <p><button id="btnDropBoxbtn" value="Connect to Dropbox" style="visibility:@Session["btnDropBoxbtnV"].ToString()" onclick="return DropBoxAuth();">  Connect to Dropbox  </button> </p>
